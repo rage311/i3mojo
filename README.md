@@ -1,5 +1,6 @@
 # i3mojo
 An i3bar-compatible status command using the Perl Mojo framework
+![image](https://user-images.githubusercontent.com/4522014/216459671-8f90062b-10dc-4f38-967d-8bf39026a707.png)
 
 This script is intended to be a direct replacement for the `i3status` command.
 
