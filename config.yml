@@ -1,0 +1,58 @@
+colors:
+  - '#888888' # PRIORITY_NORMAL
+  - '#ffffff' # PRIORITY_IMPORTANT
+  - '#ff0000' # PRIORITY_URGENT
+  - '#ff0000' # PRIORITY_CRITICAL
+
+log:
+  path:  /tmp/i3mojo.log
+  level: info
+    # all options:
+    # error
+    # warn
+    # info
+    # debug
+
+modules:
+  -
+    module:   linux_network
+    interval: 10
+    icon:     
+
+  -
+    module:   linux_memory
+    interval: 8
+    icon:     
+    config:
+      urgent: 10
+
+  -
+    module:   linux_cpu_usage
+    interval: 2
+    icon:     
+
+  -
+    module:   disk_usage
+    interval: 120
+    icon:     /
+    config:
+      mount: /
+
+  -
+    module:   disk_usage
+    interval: 120
+    icon:      
+    config:
+      mount: /home
+
+  -
+    module:   pulseaudio
+    interval: 1
+
+  -
+    module:   datetime
+    interval: 15
+    icon:     
+    config:
+      timezone: UTC
+      format:  '%Z %a %m/%d %H:%M'
