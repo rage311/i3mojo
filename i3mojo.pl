@@ -22,9 +22,9 @@ use constant I3BAR_CONFIG => {
   click_events => \1, # boolean true
 };
 
-use constant CONFIG_FILE => $ARGV[0] // 'config.yml';
+use constant CONFIG_FILE => $ARGV[0] // $RealBin . '/config.yml';
 
-has config => sub { state $config = LoadFile($RealBin . '/' . CONFIG_FILE) };
+has config => sub { state $config = LoadFile CONFIG_FILE };
 
 has instances => sub ($self) {
   croak 'modules not found in config' unless
