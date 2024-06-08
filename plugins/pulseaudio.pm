@@ -13,13 +13,13 @@ use constant VOLUME_ICONS => [
 # separate because mute can't be scaled like the volume levels
 use constant VOLUME_ICONS_MUTE => ''; #f6a9 fa-volume-mute
 
-has amount => 5;
-has device => 'Master';
+has step_size => 5;
+has device    => 'Master';
 
 sub status_volume ($self) {
-  #return ('on', 100);
   my $device = $self->device;
-  return unless my $volume = qx(/usr/bin/amixer -D pulse get $device);
+  return unless
+    my $volume = qx(/usr/bin/amixer -D pulse get $device);
   return ($2, $1) if $volume =~ /\[(\d+)%\] \[(.+)\]/;
   return ('?', -1);
 }
@@ -44,6 +44,7 @@ sub status ($self) {
 
 sub click ($self, $button) {
   my ($status, $volume) = $self->status_volume;
+  my $step_size = $self->step_size;
 
   my $dispatch = {
     MOUSE_LEFT() => sub {
@@ -53,11 +54,11 @@ sub click ($self, $button) {
       system(qw( /usr/bin/i3-msg -q -- exec /usr/bin/xterm -e pulsemixer ));
     },
     MOUSE_UP() => sub {
-      my $round_volume = int(($volume + 5) / 5) * 5;
+      my $round_volume = int(($volume + $step_size) / $step_size) * $step_size;
       system('/usr/bin/pactl', 'set-sink-volume', '@DEFAULT_SINK@', "$round_volume%");
     },
     MOUSE_DOWN() => sub {
-      my $round_volume = int(($volume - 1) / 5) * 5;
+      my $round_volume = int(($volume - 1) / $step_size) * $step_size;
       system('/usr/bin/pactl', 'set-sink-volume', '@DEFAULT_SINK@', "$round_volume%");
     },
   };

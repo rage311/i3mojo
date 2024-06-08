@@ -74,7 +74,7 @@ sub instance_changed ($self, $instance) {
     !$instance->{last_status}
     || $instance->{new_status} ne $instance->{last_status}
     || !defined $instance->{last_priority}
-    || ( defined $instance->{new_priority}
+    || (defined $instance->{new_priority}
         && $instance->{new_priority} != $instance->{last_priority}
        );
 }
@@ -87,7 +87,7 @@ sub run_instance_long ($self, $instance) {
     return $self->log->warn("run_instance_long no data: " . dumper \@data)
       unless ($instance->{new_status}, $instance->{priority}) = @data;
 
-    $self->log->info("run_instance_long: $instance->{instance}, $instance->{new_status}");
+    $self->log->debug("run_instance_long: $instance->{instance}, $instance->{new_status}");
     $self->write_output if $self->instance_changed($instance);
   });
 
@@ -109,10 +109,13 @@ sub run_instance ($self, $instance, $new_status = undef) {
       return $new_status ? @$new_status : $instance->{instance}->status;
     },
     sub ($sub, $err, @results) {
-      $self->log->error("Subprocess ERROR: $err") and return if $err;
+      $self->log->error("Subprocess ERROR: $err")
+        and return
+        if $err;
+
       $self->log->debug("No result $instance->{module}: $instance->{instance}")
-        and return unless
-        ($instance->{new_status}, $instance->{priority}) = @results;
+        and return
+        unless ($instance->{new_status}, $instance->{priority}) = @results;
 
       $self->write_output if $self->instance_changed($instance);
 
