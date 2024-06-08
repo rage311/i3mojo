@@ -37,36 +37,30 @@ has sys_path => '/sys/class/power_supply/BAT1';
 sub status ($self) {
   my $path = Mojo::File->new($self->sys_path);
   my $batt = {
-    status  => trim $path->child('status')->slurp,
-    percent => trim $path->child('capacity')->slurp,
-    charge  => trim $path->child('charge_now')->slurp,
+    status       => trim($path->child('status')->slurp),
+    percent      => trim($path->child('capacity')->slurp),
+    charge       => trim($path->child('charge_now')->slurp),
+    current      => trim($path->child('current_now')->slurp),
+    time_to_dest => '0:00',
   };
 
+  my $time_to_dest_hours = $batt->{charge} / $batt->{current};
+  my $time_to_dest_minutes = int(
+    ($time_to_dest_hours - int $time_to_dest_hours) * 60
+  );
+  $batt->{time_to_dest} =
+    int($time_to_dest_hours)
+    . ':'
+    . sprintf '%02d', $time_to_dest_minutes;
+
   say dumper $batt;
-}
 
-#Battery 0: Unknown, 99%
-
-sub status_acpi ($self) {
-  open my $acpi_fh, '-|', '/usr/bin/env acpi -b'; # args here?
-  my $acpi_output = trim <$acpi_fh>;
-  close $acpi_fh;
-
-  # Battery 0: Full, 100%
-  # Battery 0: Discharging, 77%, 08:48:06 remaining
-  my ($batt_id, $batt_status, $batt_pct, $batt_hh, $batt_mm, $batt_ss) = $acpi_output =~ /
-    Battery \s+ (\d+): \s+
-    (Discharging|Charging|Full|Unknown), \s+
-    (\d+)%
-    (?: , \s+ 0*([0-9]{1,}):([0-9]{2}):([0-9]{2}))?
-  /x;
-
-  my $charging = $batt_status ne 'Discharging'
-    && $batt_status ne 'Unknown';
-  my $icon = BATTERY_ICONS->{$batt_status} . ' ' // '';
+  my $charging = $batt->{status} ne 'Discharging'
+    && $batt->{status} ne 'Unknown';
+  my $icon = BATTERY_ICONS->{$batt->{status}} . ' ' // '';
 
   my $icon_idx = scale_nearest_int(
-    raw     => $batt_pct,
+    raw     => $batt->{percent},
     raw_min => 0,
     raw_max => 100,
     eng_min => 0,
@@ -75,14 +69,13 @@ sub status_acpi ($self) {
 
   $icon .= BATTERY_ICONS->{BATTERY}[$icon_idx];
 
-  my $return_string = "$icon $batt_pct%";
-  $return_string .= " ($batt_hh:$batt_mm)" if defined $batt_hh && defined $batt_mm;
+  my $return_string = "$icon $batt->{percent}% $batt->{time_to_dest}";
 
   my $priority = $charging
     ? PRIORITY_NORMAL
-    : $batt_pct <= $self->low_low
+    : $batt->{percent} <= $self->low_low
       ? PRIORITY_URGENT
-      : $batt_pct <= $self->low
+      : $batt->{percent} <= $self->low
         ? PRIORITY_IMPORTANT
         : undef;
 
@@ -95,4 +88,4 @@ sub click ($self, $button) {
 
 1;
 
-say __PACKAGE__->new()->status();
+#say __PACKAGE__->new()->status();
