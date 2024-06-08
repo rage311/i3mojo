@@ -51,7 +51,7 @@ sub click ($self, $button) {
       system('/usr/bin/pactl', 'set-sink-mute', '@DEFAULT_SINK@', 'toggle');
     },
     MOUSE_RIGHT() => sub {
-      system(qw( /usr/bin/i3-msg -q -- exec /usr/bin/xterm -e pulsemixer ));
+      system(qw( /usr/bin/i3-msg -q -- exec ), $self->mixer_cmd->@*);
     },
     MOUSE_UP() => sub {
       my $round_volume = int(($volume + $step_size) / $step_size) * $step_size;

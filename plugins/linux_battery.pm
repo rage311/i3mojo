@@ -8,12 +8,12 @@ use Carp 'croak';
 
 use constant {
   BATTERY_ICONS => {
-    #CHARGING => '', # fa-flash
-    Charging    => '',#"\x{f1e6}", # fa-plug
-    Full        => '',#"\x{f1e6}", # fa-plug
-    Discharging => '',
-    Unknown  => '?',
-    BATTERY  => [
+    Charging       => '',#"\x{f1e6}", # fa-plug
+    Discharging    => '',
+    Full           => '',#"\x{f1e6}", # fa-plug
+    'Not charging' => '',
+    Unknown        => '?',
+    BATTERY        => [
       '', # fa-battery-0 (alias) [&#xf244;]
       '', # fa-battery-1 (alias) [&#xf243;]
       '', # fa-battery-2 (alias) [&#xf242;]
