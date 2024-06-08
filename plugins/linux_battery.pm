@@ -26,9 +26,9 @@ use constant {
 # can be changed with config in ->new() call
 has low      => 20;
 has low_low  => 10;
-has sys_path => '/sys/class/power_supply/BAT1';
+has sys_path => '/sys/class/power_supply/BAT0';
 
-# files:
+# files in /sys/class/power_supply/BATX:
 #   capacity (% charge)
 #   charge_full (mA ?)
 #   charge_now (mA ?)
@@ -53,8 +53,6 @@ sub status ($self) {
     . ':'
     . sprintf '%02d', $time_to_dest_minutes;
 
-  say dumper $batt;
-
   my $charging = $batt->{status} ne 'Discharging'
     && $batt->{status} ne 'Unknown';
   my $icon = BATTERY_ICONS->{$batt->{status}} . ' ' // '';
@@ -69,7 +67,7 @@ sub status ($self) {
 
   $icon .= BATTERY_ICONS->{BATTERY}[$icon_idx];
 
-  my $return_string = "$icon $batt->{percent}% $batt->{time_to_dest}";
+  my $return_string = "$icon $batt->{percent}% ($batt->{time_to_dest})";
 
   my $priority = $charging
     ? PRIORITY_NORMAL
