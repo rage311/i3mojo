@@ -2,7 +2,8 @@ package linux_battery;
 
 use Mojo::Base 'i3Mojo::Plugin::Base', -signatures;
 use i3Mojo::Util;
-use Mojo::Util 'trim';
+use Mojo::File;
+use Mojo::Util qw/dumper trim/;
 use Carp 'croak';
 
 use constant {
@@ -23,13 +24,30 @@ use constant {
 };
 
 # can be changed with config in ->new() call
-has low     => 20;
-has low_low => 10;
+has low      => 20;
+has low_low  => 10;
+has sys_path => '/sys/class/power_supply/BAT1';
 
+# files:
+#   capacity (% charge)
+#   charge_full (mA ?)
+#   charge_now (mA ?)
+#   status (string -- "Discharging", ... assuming same options as acpi?)
+
+sub status ($self) {
+  my $path = Mojo::File->new($self->sys_path);
+  my $batt = {
+    status  => trim $path->child('status')->slurp,
+    percent => trim $path->child('capacity')->slurp,
+    charge  => trim $path->child('charge_now')->slurp,
+  };
+
+  say dumper $batt;
+}
 
 #Battery 0: Unknown, 99%
 
-sub status ($self) {
+sub status_acpi ($self) {
   open my $acpi_fh, '-|', '/usr/bin/env acpi -b'; # args here?
   my $acpi_output = trim <$acpi_fh>;
   close $acpi_fh;
@@ -77,4 +95,4 @@ sub click ($self, $button) {
 
 1;
 
-#say __PACKAGE__->new()->status();
+say __PACKAGE__->new()->status();
