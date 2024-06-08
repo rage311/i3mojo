@@ -7,12 +7,12 @@ use Carp 'croak';
 
 use constant {
   BATTERY_ICONS => {
-    #CHARGING => '', # fa-flash
-    Charging    => '',#"\x{f1e6}", # fa-plug
-    Full        => '',#"\x{f1e6}", # fa-plug
-    Discharging => '',
-    Unknown  => '?',
-    BATTERY  => [
+    Charging       => '',#"\x{f1e6}", # fa-plug
+    Discharging    => '',
+    Full           => '',#"\x{f1e6}", # fa-plug
+    'Not charging' => '',
+    Unknown        => '?',
+    BATTERY        => [
       '', # fa-battery-0 (alias) [&#xf244;]
       '', # fa-battery-1 (alias) [&#xf243;]
       '', # fa-battery-2 (alias) [&#xf242;]
@@ -35,16 +35,20 @@ sub status ($self) {
   close $acpi_fh;
 
   # Battery 0: Full, 100%
+  # Battery 0: Not charging, 100%
   # Battery 0: Discharging, 77%, 08:48:06 remaining
   my ($batt_id, $batt_status, $batt_pct, $batt_hh, $batt_mm, $batt_ss) = $acpi_output =~ /
     Battery \s+ (\d+): \s+
-    (Discharging|Charging|Full|Unknown), \s+
+    (Charging|Discharging|Full|Not \s charging|Unknown), \s+
     (\d+)%
     (?: , \s+ 0*([0-9]{1,}):([0-9]{2}):([0-9]{2}))?
   /x;
 
-  my $charging = $batt_status ne 'Discharging'
+  my $charging =
+    $batt_status ne 'Discharging'
+    && $batt_status ne 'Not charging'
     && $batt_status ne 'Unknown';
+
   my $icon = BATTERY_ICONS->{$batt_status} . ' ' // '';
 
   my $icon_idx = scale_nearest_int(
