@@ -15,6 +15,7 @@ use constant VOLUME_ICONS_MUTE => ''; #f6a9 fa-volume-mute
 
 has step_size => 5;
 has device    => 'Master';
+has mixer_cmd => 'xterm -e pulsemixer';
 
 sub status_volume ($self) {
   my $device = $self->device;
@@ -51,7 +52,10 @@ sub click ($self, $button) {
       system('/usr/bin/pactl', 'set-sink-mute', '@DEFAULT_SINK@', 'toggle');
     },
     MOUSE_RIGHT() => sub {
-      system(qw( /usr/bin/i3-msg -q -- exec ), $self->mixer_cmd->@*);
+      system(
+        qw( /usr/bin/i3-msg -q -- exec ),
+        (split /\s+/, $self->mixer_cmd)
+      );
     },
     MOUSE_UP() => sub {
       my $round_volume = int(($volume + $step_size) / $step_size) * $step_size;
