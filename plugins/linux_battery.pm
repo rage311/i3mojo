@@ -67,7 +67,9 @@ sub status ($self) {
 
   $icon .= BATTERY_ICONS->{BATTERY}[$icon_idx];
 
-  my $return_string = "$icon $batt->{percent}% ($batt->{time_to_dest})";
+  my $return_string = "$icon $batt->{percent}%";
+  $return_string .= " ($batt->{time_to_dest})"
+    if !$charging;
 
   my $priority = $charging
     ? PRIORITY_NORMAL
