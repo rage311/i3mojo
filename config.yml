@@ -39,6 +39,13 @@ modules:
       mount: /
 
   -
+    module:   pipe_balm
+    interval: listen
+    icon:     '-|-'
+    config:
+      path:   /tmp/mypipe
+
+  -
     module:   disk_usage
     interval: 120
     icon:      
