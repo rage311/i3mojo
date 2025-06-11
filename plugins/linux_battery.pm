@@ -44,7 +44,14 @@ sub status ($self) {
     time_to_dest => '0:00',
   };
 
-  my $time_to_dest_hours = $batt->{charge} / $batt->{current};
+  # avoid dividing by zero
+  # return ('?', PRIORITY_URGENT)
+  #   if $batt->{current} == 0;
+
+  # if current is 0, not charging
+  my $time_to_dest_hours = $batt->{current}
+    ? $batt->{charge} / $batt->{current}
+    : 1;
   my $time_to_dest_minutes = int(
     ($time_to_dest_hours - int $time_to_dest_hours) * 60
   );
@@ -55,7 +62,10 @@ sub status ($self) {
 
   my $charging = $batt->{status} ne 'Discharging'
     && $batt->{status} ne 'Unknown';
-  my $icon = BATTERY_ICONS->{$batt->{status}} . ' ' // '';
+
+  my $icon = defined BATTERY_ICONS->{$batt->{status}}
+    ? BATTERY_ICONS->{$batt->{status}} . ' '
+    : '';
 
   my $icon_idx = scale_nearest_int(
     raw     => $batt->{percent},
