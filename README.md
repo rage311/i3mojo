@@ -14,7 +14,7 @@ Requirements:
 
 Usage:
 - Clone this repo: `git clone https://github.com/rage311/i3mojo` and make note of the directory it's in
-- Change the i3 config to use this is the status command
+- Change the i3 config to use this as the status command
   - In the i3 config file (`$HOME/.config/i3/config` by default) replace any existing `status_command ...` lines in the `bar { ... }` section with:
   `status_command perl /WHEREVER/YOU/PUT/IT/i3mojo/i3mojo.pl`
 - Tweak the `i3mojo/config.yml` file to your heart's content to add/configure plugins, change status colors, etc.
