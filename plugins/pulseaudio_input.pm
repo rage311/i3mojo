@@ -20,7 +20,7 @@ sub default_source_id {
 
 sub status ($self) {
   my $source_id = default_source_id();
-  my $muted = qx/ pulsemixer --get-mute --id $source_id /;
+  my $muted = int(qx/ pulsemixer --get-mute --id $source_id /);
   return $muted == 1 ? '' : (' ', PRIORITY_URGENT);
 }
 
