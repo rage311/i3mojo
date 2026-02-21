@@ -1,3 +1,8 @@
+# A wrapper to run i3mojo plugins in i3hojo
+#
+# Usage:
+# perl i3hojo_wrapper.pl PLUGIN_NAME PLUGIN_CONFIG_JSON
+# e.g.
 # perl i3hojo_wrapper.pl linux_battery '{"sys_path":"/sys/class/power_supply/BAT1"}'
 
 use 5.038;
@@ -17,10 +22,7 @@ use constant PRIORITY_CRITICAL  => 3;
 
 my $plug_name   = $ARGV[0];
 my $plug_config = $ARGV[1];
-# say "plug: $plug_name";
-# say "plug_config: $plug_config";
 my $config = eval { decode_json $plug_config };
-# say dumper $config;
 
 eval { require "$plug_name.pm"; 1 };
 warn ("Unable to load: $plug_name. $@")
