@@ -6,7 +6,6 @@ use Carp 'croak';
 
 use Mojo::UserAgent;
 
-use constant SECONDS_PER_DAY => 86_400;
 use constant ICONS => {
   'clear-day'           => '',
   'clear-night'         => '',
@@ -34,8 +33,8 @@ sub status ($self) {
       . '/' . $self->api_key
       . '/' . $self->lat
       . ',' . $self->long,
-    form => { exclude => join ',', qw/ minutely hourly alerts flags /
-  })->res;
+    form => { exclude => join ',', qw/ minutely hourly alerts flags / }
+  )->res;
 
   croak 'Error in response from pirateweather API' unless
     $res && (my $json = $res->json);
