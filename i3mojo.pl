@@ -1,16 +1,17 @@
 #!/usr/bin/env perl
 
-use 5.034;
+use 5.040;
 
 use Mojo::Base -base, -signatures;
 use Mojo::IOLoop;
 use Mojo::Collection;
+use Mojo::File;
 use Mojo::JSON qw(encode_json decode_json);
 use Mojo::Util qw(dumper trim);
 use Mojo::Log;
 
 use Carp 'croak';
-use YAML 'LoadFile';
+use YAML::PP;
 use FindBin '$RealBin';
 
 use lib "$RealBin/plugins";
@@ -24,7 +25,9 @@ use constant I3BAR_CONFIG => {
 
 use constant CONFIG_FILE => $ARGV[0] // $RealBin . '/config.yml';
 
-has config => sub { state $config = LoadFile CONFIG_FILE };
+has config => sub {
+  state $config = YAML::PP->new->load_file(CONFIG_FILE());
+};
 
 has instances => sub ($self) {
   croak 'modules not found in config' unless
@@ -33,7 +36,7 @@ has instances => sub ($self) {
 
 has log => sub ($self) {
   state $log = Mojo::Log->new(
-    path  => $self->config->{log}{path}  // "/tmp/i3mojo.log",
+    path  => $self->config->{log}{path},
     level => $self->config->{log}{level} // 'info'
   );
 };
@@ -53,7 +56,14 @@ sub load_modules ($self) {
 
 sub make_i3_message ($self) {
   return $self->instances->map(sub {
-      return () unless $_->{new_status};
+      return () if (
+        !defined $_->{new_status}
+        || (
+          defined $_->{hide_empty}
+          && $_->{hide_empty} eq !!1
+          && $_->{new_status} eq ''
+        )
+      );
       return {
         full_text => ($_->{icon} ? "$_->{icon} " : '') . $_->{new_status},
         name      => $_->{module},
@@ -106,7 +116,7 @@ sub run_instance_long ($self, $instance) {
 sub run_instance ($self, $instance, $new_status = undef) {
   $self->loop->subprocess(
     sub ($sub) {
-      return $new_status ? @$new_status : $instance->{instance}->status;
+      return defined $new_status ? @$new_status : $instance->{instance}->status();
     },
     sub ($sub, $err, @results) {
       $self->log->error("Subprocess ERROR: $err")
@@ -164,6 +174,12 @@ sub listen_input ($self) {
 
 
 my $self = __PACKAGE__->new();
+
+$self->config->{log}{path} //= "/tmp/i3mojo.log";
+if (!-e $self->config->{log}{path}) {
+  Mojo::File->new($self->config->{log}{path})->touch->chmod(0600);
+};
+
 $self->log->info('i3mojo starting...');
 $self->log->info('Log level: ' . $self->log->level);
 $self->load_modules;
