@@ -40,7 +40,11 @@ sub status ($self) {
       eng_max => $#{VOLUME_ICONS()}
     )];
 
-  return ("$icon $volume%", $volume > 100 ? PRIORITY_URGENT : PRIORITY_NORMAL);
+  return (
+    "$icon $volume%", $volume > 100
+      ? PRIORITY_URGENT
+      : PRIORITY_NORMAL
+  );
 }
 
 sub click ($self, $button) {
@@ -58,18 +62,18 @@ sub click ($self, $button) {
       );
     },
     MOUSE_UP() => sub {
-      my $round_volume = int(($volume + $step_size) / $step_size) * $step_size;
-      system('/usr/bin/pactl', 'set-sink-volume', '@DEFAULT_SINK@', "$round_volume%");
+      system('/usr/bin/pactl', 'set-sink-volume', '@DEFAULT_SINK@', "+$step_size%");
     },
     MOUSE_DOWN() => sub {
-      my $round_volume = int(($volume - 1) / $step_size) * $step_size;
-      system('/usr/bin/pactl', 'set-sink-volume', '@DEFAULT_SINK@', "$round_volume%");
+      system('/usr/bin/pactl', 'set-sink-volume', '@DEFAULT_SINK@', "-$step_size%");
     },
   };
 
-  return 1 unless defined $button && defined $dispatch->{$button};
+  return 1 unless
+    defined $button
+    && defined $dispatch->{$button};
 
-  # Handle mouse button input
+  # handle mouse button input
   $dispatch->{$button}->();
 
   return 1;
