@@ -25,7 +25,7 @@ sub listen ($self, $subprocess) {
     if (! -p $self->path) {
       croak "Unable to create pipe " . $self->path . ". $!"
         unless
-        mkfifo $self->path, 0666;
+        mkfifo $self->path, 0666; # \m/
     }
 
     croak "Unable to open pipe " . $self->path . ". $!"
@@ -45,12 +45,6 @@ sub listen ($self, $subprocess) {
 
     sleep 1;
   }
-
-  # TODO: restart process if it fails
-  # $subprocess->progress('err', PRIORITY_CRITICAL);
-  # close $pipe;
-
-  return 'empty';
 }
 
 sub click ($self, $button) {
